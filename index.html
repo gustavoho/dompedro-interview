@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+	<title>Dom Pedro Interview</title>
+
+</head>
+<body>	
+	
+	 <h1 class="title" font-weight="bold">Dom Pedro Interview</h1>
+	 <h2 class="title" font-weight="bold">Gustavo Oliveira <br><br></h2>
+
+    <style media="screen">
+        body {width: 500px; margin: 0 auto; margin-top: 2rem; }
+        .send {width: 100%; margin: 0; padding: 0; margin-top: 1rem; }
+        input.text {width: 80%; margin: 0; padding: 0; padding: 5px; }
+        .btn {padding: 5px 0; width: 82px; background-color: #eee; border: 0; margin: 0; border: solid #eee;        }
+        .btn:hover {background-color: #00e4bc}
+        ul {list-style-type: none;width: 100%;padding: 0;margin: 0;}
+        li { padding: 5px 10px; }
+        li:nth-child(odd) {background-color: #eee}
+    </style>
+
+
+    <!--  Lista de mensagens -->
+
+<ul class="ul" id="messages"></ul>
+
+    <!--  input com e botão de submit-->
+
+<div class="send">
+        <input class="text" autofocus="" id="menssagem" autocomplete="off" placeholder="Cadastrar no Banco de Dados?">
+        <button class="btn" id="enviar_menssagem">Cadastrar</button>
+</div>
+
+
+<!--  importar o client do socketIO-->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    // faz com que seja possível enviar mensagens com Enter
+    document.getElementById('menssagem').addEventListener('keypress', function(e) {
+        var key = e.which || e.keyCode;
+        if (key == 13) {
+            enviar_menssagem();
+        }
+    });
+    // inicia o client socketIO
+    var socket = io();
+	var name;
+	var email;
+	
+	cad_name();
+	cad_email();
+	
+	function cad_name(){
+		// Abre um popup perguntando o nome da pessoa
+		 name = prompt("Qual seu nome?");
+		
+		do{
+			if(name === null || name == "" || name == " ") {
+				name = prompt("Não foi digitado nenhum nome. Qual seu nome?");
+				
+			}
+			console.log("name.length: "+ name.length)
+		}while(name.length <= 0);	
+
+		//socket.emit('chat message', "Bem vindo! " + name);
+		print_pagina("Bem vindo! " + name);	
+   }
+   
+   function cad_email(){
+		 // Abre um popup perguntando o email da pessoa
+		email = prompt("Qual seu email?");
+		
+		do{
+			if(email === null || email == "" || email == " ") {
+				email = prompt("Não foi digitado nenhum email. Qual seu email?");
+			}
+		}while(email.length <= 0);
+		
+		//socket.emit('chat message', "Email: " + email);
+		print_pagina("Email: " + email);	
+  
+	}
+
+    // adiciona um addEventListener para o botão de submit
+    document.getElementById('enviar_menssagem').addEventListener("click", enviar_menssagem);
+	
+	function data_hora_atual(){
+		var data = new Date();
+		// Guarda cada pedaço em uma variável
+		var dia     = data.getDate();           // 1-31
+		var dia_sem = data.getDay();            // 0-6 (zero=domingo)
+		var mes     = data.getMonth();          // 0-11 (zero=janeiro)
+		var ano2    = data.getYear();           // 2 dígitos
+		var ano4    = data.getFullYear();       // 4 dígitos
+		var hora    = data.getHours();          // 0-23
+		var min     = data.getMinutes();        // 0-59
+		var seg     = data.getSeconds();        // 0-59
+		var mseg    = data.getMilliseconds();   // 0-999
+		var tz      = data.getTimezoneOffset(); // em minutos
+		// Formata a data e a hora (note o mês + 1)
+		var str_data = dia + '/' + (mes+1) + '/' + ano4;
+		var str_hora = hora + ':' + min + ':' + seg;
+		console.log("Data: "+str_data + ' às ' + str_hora);
+		return str_data + ' às ' + str_hora;
+	}
+	
+    // cria a função que conecta no websocket e emite a mensagem
+    function enviar_menssagem() {
+	dt = data_hora_atual();
+      // salva a mensagem como uma string
+      msg = document.getElementById('menssagem').value;
+      if (msg.length > 0) {
+          console.log(msg);
+		  
+		  console.log(name);
+		  console.log(email);
+		  console.log(dt);
+          // concatena o nome de usuário e a email para enviar ao socketIo
+		  var infObject = {
+					name: name,
+					email: email,
+					data_hora: dt
+				};
+				
+          socket.emit('chat message',  infObject);
+		  
+		  print_pagina("Dados para cadastro: " + name + ", " + email + ", " + infObject.data_hora);
+		  
+          // reseta o valor do input da mensagem
+          document.getElementById('menssagem').value = "";
+		  
+		  
+		  //aux = document.getElementById('menssagem').value;
+		  //if(aux.content("Sim")){
+			//cad_name();
+			//cad_email();
+			
+			// adiciona um addEventListener para o botão de submit
+			//document.getElementById('enviar_menssagem').addEventListener("click", enviar_menssagem);
+	
+		  //}
+      }
+    }
+	
+	// sempre que receber uma mensagem ela é adicionada a lista
+	function print_pagina(msg){
+	// busca o elemento UL
+        let ul = document.getElementById("messages");
+        // cria um elemento LI
+        let li = document.createElement('li');
+        // cria o elemento de quebra de linha
+        let br = document.createElement('br');
+        li.appendChild(document.createTextNode(msg));
+        // adicionar o nome do usuário quebra a linha e adicionar a mensagem à lista de mensagems
+        ul.appendChild(li);
+	}
+    
+    
+
+    </script>
+	
+	</body>
+</html>
